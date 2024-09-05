@@ -104,6 +104,30 @@ _start:
 	MOV edx, 16
 	INT 0x80
 
+	;Suma
+suma:
+	MOV eax, num1
+	MOV ebx, num2
+	ADD eax, ebx
+	;guardar resultado
+	MOV [resultado], eax
+	JMP mostrarResultado
+
+mostrarResultado:
+	; Mostrar mensaje de resultado
+	MOV eax, 4
+	MOV ebx, 1
+	MOV ecx, resultadoMsg
+	MOV edx, lenResultadoMsg
+	INT 0x80
+	
+	; Mostrar resultado
+	MOV eax, 4
+	MOV ebx, 1
+	MOV ecx, resultado
+	MOV edx, 16
+	INT 0x80
+
 	;Salir del programa
 	MOV eax, 1
 	MOV ebx, 0
