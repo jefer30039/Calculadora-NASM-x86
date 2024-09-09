@@ -22,6 +22,7 @@ section .bss
 	num1: resq 1 ; Almacena el primer número (operando)
 	num2: resq 1 ; Almacena el segundo número (operando)
 	resultado: resq 1 ; Almacena el resultado
+	buffer resb 64  ; Buffer para almacenar cadenas
 
 section .text
 	global _start
@@ -37,14 +38,13 @@ _start:
 	call readint
 	mov [operacion], rax
 
-
 	; Solicitar base
 	lea rdi, [baseMsg]
-	;call printstr
+	call printstr
 	lea rdi, [baseSol]
-	;call printstr
-	;call readint
-	mov [base], rax
+	call printstr
+	call readint
+	mov [base], rax  ; Guardar la base seleccionada
 
 	; Solicitar primer número
 	lea rdi, [num1Msg]
@@ -120,14 +120,131 @@ divisionPorCero:
 	JMP _start
 
 mostrarResultado:
-	; Mostrar resultado en decimal
+	; Mostrar resultado en la base seleccionada
+	mov rax, [resultado]   ; Cargar el resultado
+	mov rbx, [base]        ; Cargar la base seleccionada
+
+	; Verificar base seleccionada y mostrar resultado
+	CMP rbx, 1
+	JE mostrarBinario
+	CMP rbx, 2
+	JE mostrarOctal
+	CMP rbx, 3
+	JE mostrarDecimal
+	CMP rbx, 4
+	JE mostrarHexadecimal
+	JMP salir
+
+mostrarBinario:
 	lea rdi, [resultadoMsg]
 	call printstr
 	mov rdi, [resultado]
-	call printint
+	call printbin  ; Llamado para imprimir en binario
 	lea rdi, [saltoLinea]
 	call printstr
+	JMP mostrarSalida
 
+mostrarOctal:
+	lea rdi, [resultadoMsg]
+	call printstr
+	mov rdi, [resultado]
+	call printoct  ; Llamado para imprimir en octal
+	lea rdi, [saltoLinea]
+	call printstr
+	JMP mostrarSalida
+
+mostrarDecimal:
+	lea rdi, [resultadoMsg]
+	call printstr
+	mov rdi, [resultado]
+	call printint  ; Llamado para imprimir en decimal
+	lea rdi, [saltoLinea]
+	call printstr
+	JMP mostrarSalida
+
+mostrarHexadecimal:
+	lea rdi, [resultadoMsg]
+	call printstr
+	mov rdi, [resultado]
+	call printhex  ; Llamado para imprimir en hexadecimal
+	lea rdi, [saltoLinea]
+	call printstr
+	JMP mostrarSalida
+
+printbin:
+    	; Convierte el número en rdi a binario y lo imprime
+    	; Aquí puedes implementar la lógica de conversión y mostrar bit por bit
+    	ret
+
+printchar:
+    	; RDI contiene el carácter a imprimir
+    	mov rax, 1              ; syscall: sys_write
+    	mov rdi, 1              ; file descriptor: stdout (1 = salida estándar)
+    	mov rsi, rsp            ; usar la pila para el carácter
+    	sub rsp, 1              ; reservar 1 byte en la pila
+    	mov [rsp], dil          ; almacenar el carácter en la pila (dil = 8 bits de rdi)
+    	mov rdx, 1              ; tamaño de 1 byte
+    	syscall                 ; llamada al sistema
+    	add rsp, 1              ; restaurar la pila
+    	ret                     ; regresar de la función
+
+printoct:
+	mov rax, rdi        ; Copiamos el número en rax
+	mov rbx, 8          ; Base octal
+    	mov rcx, 22         ; Máximo 22 dígitos octales para un número de 64 bits
+
+    	lea rsi, [buffer+22] ; Apuntar al final del buffer
+    	mov byte [rsi], 0   ; Final de cadena
+
+printoct_loop:
+    	test rax, rax
+    	jz printoct_done    ; Si ya terminamos de convertir, salir
+
+    	xor rdx, rdx
+    	div rbx             ; Dividir entre 8, el resto queda en rdx
+    	add dl, '0'         ; Convertir el valor en dígito ASCII
+    	dec rsi
+    	mov [rsi], dl       ; Guardar el dígito en el buffer
+    	jmp printoct_loop
+
+printoct_done:
+    	lea rdi, [rsi]
+    	call printstr       ; Imprimir la cadena octal
+    	ret
+
+printhex:
+    	mov rax, rdi        ; Copiamos el número en rax
+    	mov rbx, 16         ; Base hexadecimal
+    	mov rcx, 16         ; Máximo 16 dígitos hexadecimales para un número de 64 bits
+
+    	lea rsi, [buffer+16] ; Apuntar al final del buffer
+    	mov byte [rsi], 0   ; Final de cadena
+
+printhex_loop:
+    	test rax, rax
+    	jz printhex_done    ; Si ya terminamos de convertir, salir
+
+    	xor rdx, rdx
+    	div rbx             ; Dividir entre 16, el resto queda en rdx
+    	cmp dl, 9
+    	jle printhex_digit  ; Si el valor es 0-9, convertir a dígito ASCII
+    	add dl, 'A' - 10    ; Si es A-F, ajustar al código ASCII
+    	jmp printhex_store
+
+printhex_digit:
+    	add dl, '0'         ; Convertir a carácter ASCII
+
+printhex_store:
+    	dec rsi
+    	mov [rsi], dl       ; Guardar el dígito en el buffer
+    	jmp printhex_loop
+
+printhex_done:
+    	lea rdi, [rsi]
+    	call printstr       ; Imprimir la cadena hexadecimal
+    	ret
+
+mostrarSalida:
 	;Mostrar mensaje de salida
 	lea rdi, [msgSalida]
 	call printstr
@@ -140,5 +257,3 @@ salir:
 	MOV eax, 1
 	MOV ebx, 0
 	INT 0x80
-
-
