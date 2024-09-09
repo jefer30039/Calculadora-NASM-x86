@@ -1,132 +1,111 @@
 ;Calculadora en NASM x86 para Linux
 
+%include 'util.asm' ;biblioteca de funciones básicas
+
 section .data
 
 	; Mensajes
-	msg db "Elige la operación: 1. Suma, 2. Resta, 3. Multiplicacion, 4. Division", 0xA
-	lenMsg equ $-msg
-
-	operacionMsg db "Ingresa la operación: ", 0xA
-	lenOperacionMsg equ $-operacionMsg
-
-	baseMsg db "En que base deseas el resultado: 1. Binario, 2. Octal, 3. Decimal, 4. Hexadecimal", 0xA
-	lenBaseMsg equ $-baseMsg
-
-	num1Msg db "Ingresa el primer numero (en base decimal): ", 0xA
-	lenNum1Msg equ $-num1Msg
-
-	num2Msg db "Ingresa el segundo numero (en base decimal): ", 0xA
-	lenNum2Msg equ $-num2Msg
-
-	resultadoMsg db "El resultado en decimal es: ", 0xA
-	lenResultadoMsg equ $-resultadoMsg
-
-	resBinarioMsg db "El resultado en binario es: ", 0xA
-	lenResBinarioMsg equ $-resBinarioMsg
-
-	resOctalMsg db "El resultado en octal es: ", 0xA
-	lenResOctalMsg equ $-resOctalMsg
-
-	resHexMsg db "El resultado en hexadecimal es: ", 0xA
-	lenResHexMsg equ $-resHexMsg
+	msg: db "Elige la operación: 1. Suma, 2. Resta, 3. Multiplicacion, 4. Division", 10, 0
+	operacionMsg: db "Ingresa la operación: a realizar: ", 0
+	baseMsg: db 'En que base deseas el resultado: 1. Binario, 2. Octal, 3. Decimal, 4. Hexadecimal', 10, 0
+	baseSol: db 'Ingresa la base: ', 0
+	num1Msg: db 'Ingresa el primer numero (en base decimal): ', 0
+	num2Msg: db 'Ingresa el segundo numero (en base decimal): ', 0
+	resultadoMsg: db 'El resultado es: ', 0
+	saltoLinea: db 10, 0
 
 section .bss
-	operación resb 16
-	base resb 16
-	num1 resb 16
-	num2 resb 16
-	resultado resb 16
+	operacion: resq 1 ; Almacena la operación a realizar
+	base: resq 1 ; Almacena la base del resultado
+	num1: resq 1 ; Almacena el primer número (operando)
+	num2: resq 1 ; Almacena el segundo número (operando)
+	resultado: resq 1 ; Almacena el resultado
 
 section .text
 	global _start
 
 _start:
 	; Mostrar opciones de operaciones
-	MOV eax, 4
-	MOV ebx, 1
-	MOV ecx, msg
-	MOV edx, lenMsg
-	INT 0x80
+	lea rdi, [msg]
+	call printstr
 
 	; Solicitar operación
-	MOV eax, 4
-	MOV ebx, 1
-	MOV ecx, operacionMsg
-	MOV edx, lenOperacionMsg
-	INT 0x80
+	lea rdi, [operacionMsg]
+	call printstr
+	call readint
+	mov [operacion], rax
 
-	; Leer operación
-	MOV eax, 3
-	MOV ebx, 0
-	MOV ecx, operación
-	MOV edx, 1
-	INT 0x80
 
 	; Solicitar base
-	MOV eax, 4
-	MOV ebx, 1
-	MOV ecx, baseMsg
-	MOV edx, lenBaseMsg
-	INT 0x80
-
-	; Leer base
-	MOV eax, 3
-	MOV ebx, 0
-	MOV ecx, base
-	MOV edx, 1
-	INT 0x80
+	lea rdi, [baseMsg]
+	;call printstr
+	lea rdi, [baseSol]
+	;call printstr
+	;call readint
+	mov [base], rax
 
 	; Solicitar primer número
-	MOV eax, 4
-	MOV ebx, 1
-	MOV ecx, num1Msg
-	MOV edx, lenNum1Msg
-	INT 0x80
-
-	; Leer primer número
-	MOV eax, 3
-	MOV ebx, 0
-	MOV ecx, num1
-	MOV edx, 16
-	INT 0x80
+	lea rdi, [num1Msg]
+	call printstr 
+	call readint ; Lee un entero de la entrada estándar y lo almacena en rax
+	mov [num1], rax ; Guardar el primer número en num1
 
 	; Solicitar segundo número
-	MOV eax, 4
-	MOV ebx, 1
-	MOV ecx, num2Msg
-	MOV edx, lenNum2Msg
-	INT 0x80
+	lea rdi, [num2Msg]
+	call printstr
+	call readint ; Lee un entero de la entrada estándar y lo almacena en rax
+	mov [num2], rax ; Guardar el segundo número en num2
 
-	; Leer segundo número
-	MOV eax, 3
-	MOV ebx, 0
-	MOV ecx, num2
-	MOV edx, 16
-	INT 0x80
+	; Realizar operación
+	CMP qword [operacion], 1
+	JE suma
+	CMP qword [operacion], 2
+	JE resta
+	CMP qword [operacion], 3
+	JE multiplicacion
+	CMP qword [operacion], 4
+	JE division
 
-	;Suma
 suma:
-	MOV eax, num1
-	MOV ebx, num2
-	ADD eax, ebx
-	;guardar resultado
-	MOV [resultado], eax
+	;Sumar números
+	MOV rax, [num1]
+	MOV rbx, [num2]
+	ADD rax, rbx
+	MOV [resultado], rax
+	JMP mostrarResultado
+
+resta:
+	;Restar números
+	MOV rax, [num1]
+	MOV rbx, [num2]
+	SUB rax, rbx
+	MOV [resultado], rax
+	JMP mostrarResultado
+
+multiplicacion:
+	;Multiplicar números
+	MOV rax, [num1]
+	MOV rbx, [num2]
+	IMUL rax, rbx
+	MOV [resultado], rax
+	JMP mostrarResultado
+
+division: ;Division tiene problemas*****
+	;Dividir números
+	MOV rax, [num1]
+	MOV rbx, [num2]
+	IDIV rbx
+	MOV [resultado], rax
 	JMP mostrarResultado
 
 mostrarResultado:
-	; Mostrar mensaje de resultado
-	MOV eax, 4
-	MOV ebx, 1
-	MOV ecx, resultadoMsg
-	MOV edx, lenResultadoMsg
-	INT 0x80
-	
-	; Mostrar resultado
-	MOV eax, 4
-	MOV ebx, 1
-	MOV ecx, resultado
-	MOV edx, 16
-	INT 0x80
+	; Mostrar resultado en decimal
+	lea rdi, [resultadoMsg]
+	call printstr
+	mov rdi, [resultado]
+	call printint
+	lea rdi, [saltoLinea]
+	call printstr
 
 	;Salir del programa
 	MOV eax, 1
