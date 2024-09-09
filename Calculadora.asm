@@ -100,12 +100,14 @@ multiplicacion:
 	JMP mostrarResultado
 
 division: ;Division tiene problemas
-	;Dividir números
 	MOV rax, [num1]
 	MOV rbx, [num2]
+
 	;verificar si el divisor es 0
 	CMP rbx, 0
 	JE divisionPorCero
+
+	;dividir números
 	IDIV rbx
 	MOV [resultado], rax
 	JMP mostrarResultado
