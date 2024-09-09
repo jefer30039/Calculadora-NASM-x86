@@ -5,6 +5,7 @@
 section .data
 	; Mensajes
 	msg: db "Elige la operación: 1. Suma, 2. Resta, 3. Multiplicación, 4. División", 10, 0
+	msgSalida: db "¿Desea realizar otra operación? 1. Sí, 2. No", 10, 0
 	operacionMsg: db "Ingresa la operación a realizar: ", 0
 	baseMsg: db 'En qué base deseas el resultado: 1. Binario, 2. Octal, 3. Decimal, 4. Hexadecimal', 10, 0
 	baseSol: db 'Ingresa la base: ', 0
@@ -13,6 +14,7 @@ section .data
 	resultadoMsg: db 'El resultado es: ', 0
 	opcionInvOperacion: db 'Ingresó una operación inválida, inténtelo de nuevo.', 10, 0
 	saltoLinea: db 10, 0
+	msgDivPorCero: db 'No se puede dividir por 0', 10, 0
 
 section .bss
 	operacion: resq 1 ; Almacena la operación a realizar
@@ -97,13 +99,23 @@ multiplicacion:
 	MOV [resultado], rax
 	JMP mostrarResultado
 
-division: ;Division tiene problemas*****
+division: ;Division tiene problemas
 	;Dividir números
 	MOV rax, [num1]
 	MOV rbx, [num2]
+	;verificar si el divisor es 0
+	CMP rbx, 0
+	JE divisionPorCero
 	IDIV rbx
 	MOV [resultado], rax
 	JMP mostrarResultado
+
+divisionPorCero:
+	lea rdi, [msgDivPorCero]
+	call printstr
+	lea rdi, [saltoLinea]
+	call printstr
+	JMP _start
 
 mostrarResultado:
 	; Mostrar resultado en decimal
@@ -114,6 +126,14 @@ mostrarResultado:
 	lea rdi, [saltoLinea]
 	call printstr
 
+	;Mostrar mensaje de salida
+	lea rdi, [msgSalida]
+	call printstr
+	call readint
+	CMP rax, 1
+	JE _start
+
+salir:
 	;Salir del programa
 	MOV eax, 1
 	MOV ebx, 0
