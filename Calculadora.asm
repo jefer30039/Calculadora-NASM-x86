@@ -3,15 +3,15 @@
 %include 'util.asm' ;biblioteca de funciones básicas
 
 section .data
-
 	; Mensajes
-	msg: db "Elige la operación: 1. Suma, 2. Resta, 3. Multiplicacion, 4. Division", 10, 0
-	operacionMsg: db "Ingresa la operación: a realizar: ", 0
-	baseMsg: db 'En que base deseas el resultado: 1. Binario, 2. Octal, 3. Decimal, 4. Hexadecimal', 10, 0
+	msg: db "Elige la operación: 1. Suma, 2. Resta, 3. Multiplicación, 4. División", 10, 0
+	operacionMsg: db "Ingresa la operación a realizar: ", 0
+	baseMsg: db 'En qué base deseas el resultado: 1. Binario, 2. Octal, 3. Decimal, 4. Hexadecimal', 10, 0
 	baseSol: db 'Ingresa la base: ', 0
-	num1Msg: db 'Ingresa el primer numero (en base decimal): ', 0
-	num2Msg: db 'Ingresa el segundo numero (en base decimal): ', 0
+	num1Msg: db 'Ingresa el primer número (en base decimal): ', 0
+	num2Msg: db 'Ingresa el segundo número (en base decimal): ', 0
 	resultadoMsg: db 'El resultado es: ', 0
+	opcionInvOperacion: db 'Ingresó una operación inválida, inténtelo de nuevo.', 10, 0
 	saltoLinea: db 10, 0
 
 section .bss
@@ -65,6 +65,13 @@ _start:
 	JE multiplicacion
 	CMP qword [operacion], 4
 	JE division
+	lea rdi, [saltoLinea]
+	call printstr
+	lea rdi, [opcionInvOperacion]
+	call printstr
+	lea rdi, [saltoLinea]
+	call printstr
+	JMP _start
 
 suma:
 	;Sumar números
