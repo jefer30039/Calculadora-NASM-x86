@@ -172,77 +172,77 @@ mostrarHexadecimal:
 	JMP mostrarSalida
 
 printbin:
-    	; Convierte el número en rdi a binario y lo imprime
-    	; Aquí puedes implementar la lógica de conversión y mostrar bit por bit
-    	ret
+    ; Convierte el número en rdi a binario y lo imprime
+	; Aquí puedes implementar la lógica de conversión y mostrar bit por bit
+	ret
 
 printchar:
-    	; RDI contiene el carácter a imprimir
-    	mov rax, 1              ; syscall: sys_write
-    	mov rdi, 1              ; file descriptor: stdout (1 = salida estándar)
-    	mov rsi, rsp            ; usar la pila para el carácter
-    	sub rsp, 1              ; reservar 1 byte en la pila
-    	mov [rsp], dil          ; almacenar el carácter en la pila (dil = 8 bits de rdi)
-    	mov rdx, 1              ; tamaño de 1 byte
-    	syscall                 ; llamada al sistema
-    	add rsp, 1              ; restaurar la pila
-    	ret                     ; regresar de la función
+    ; RDI contiene el carácter a imprimir
+	mov rax, 1              ; syscall: sys_write
+	mov rdi, 1              ; file descriptor: stdout (1 = salida estándar)
+	mov rsi, rsp            ; usar la pila para el carácter
+	sub rsp, 1              ; reservar 1 byte en la pila
+	mov [rsp], dil          ; almacenar el carácter en la pila (dil = 8 bits de rdi)
+	mov rdx, 1              ; tamaño de 1 byte
+	syscall                 ; llamada al sistema
+	add rsp, 1              ; restaurar la pila
+	ret                     ; regresar de la función
 
 printoct:
 	mov rax, rdi        ; Copiamos el número en rax
 	mov rbx, 8          ; Base octal
-    	mov rcx, 22         ; Máximo 22 dígitos octales para un número de 64 bits
+	mov rcx, 22         ; Máximo 22 dígitos octales para un número de 64 bits
 
-    	lea rsi, [buffer+22] ; Apuntar al final del buffer
-    	mov byte [rsi], 0   ; Final de cadena
+	lea rsi, [buffer+22] ; Apuntar al final del buffer
+	mov byte [rsi], 0   ; Final de cadena
 
 printoct_loop:
-    	test rax, rax
-    	jz printoct_done    ; Si ya terminamos de convertir, salir
+	test rax, rax
+	jz printoct_done    ; Si ya terminamos de convertir, salir
 
-    	xor rdx, rdx
-    	div rbx             ; Dividir entre 8, el resto queda en rdx
-    	add dl, '0'         ; Convertir el valor en dígito ASCII
-    	dec rsi
-    	mov [rsi], dl       ; Guardar el dígito en el buffer
-    	jmp printoct_loop
+	xor rdx, rdx
+	div rbx             ; Dividir entre 8, el resto queda en rdx
+	add dl, '0'         ; Convertir el valor en dígito ASCII
+	dec rsi
+	mov [rsi], dl       ; Guardar el dígito en el buffer
+	jmp printoct_loop
 
 printoct_done:
-    	lea rdi, [rsi]
-    	call printstr       ; Imprimir la cadena octal
-    	ret
+	lea rdi, [rsi]
+	call printstr       ; Imprimir la cadena octal
+	ret
 
 printhex:
-    	mov rax, rdi        ; Copiamos el número en rax
-    	mov rbx, 16         ; Base hexadecimal
-    	mov rcx, 16         ; Máximo 16 dígitos hexadecimales para un número de 64 bits
+	mov rax, rdi        ; Copiamos el número en rax
+	mov rbx, 16         ; Base hexadecimal
+	mov rcx, 16         ; Máximo 16 dígitos hexadecimales para un número de 64 bits
 
-    	lea rsi, [buffer+16] ; Apuntar al final del buffer
-    	mov byte [rsi], 0   ; Final de cadena
+	lea rsi, [buffer+16] ; Apuntar al final del buffer
+	mov byte [rsi], 0   ; Final de cadena
 
 printhex_loop:
-    	test rax, rax
-    	jz printhex_done    ; Si ya terminamos de convertir, salir
+	test rax, rax
+	jz printhex_done    ; Si ya terminamos de convertir, salir
 
-    	xor rdx, rdx
-    	div rbx             ; Dividir entre 16, el resto queda en rdx
-    	cmp dl, 9
-    	jle printhex_digit  ; Si el valor es 0-9, convertir a dígito ASCII
-    	add dl, 'A' - 10    ; Si es A-F, ajustar al código ASCII
-    	jmp printhex_store
+	xor rdx, rdx
+	div rbx             ; Dividir entre 16, el resto queda en rdx
+	cmp dl, 9
+	jle printhex_digit  ; Si el valor es 0-9, convertir a dígito ASCII
+	add dl, 'A' - 10    ; Si es A-F, ajustar al código ASCII
+	jmp printhex_store
 
 printhex_digit:
-    	add dl, '0'         ; Convertir a carácter ASCII
+	add dl, '0'         ; Convertir a carácter ASCII
 
 printhex_store:
-    	dec rsi
-    	mov [rsi], dl       ; Guardar el dígito en el buffer
-    	jmp printhex_loop
+	dec rsi
+	mov [rsi], dl       ; Guardar el dígito en el buffer
+	jmp printhex_loop
 
 printhex_done:
-    	lea rdi, [rsi]
-    	call printstr       ; Imprimir la cadena hexadecimal
-    	ret
+	lea rdi, [rsi]
+	call printstr       ; Imprimir la cadena hexadecimal
+	ret
 
 mostrarSalida:
 	;Mostrar mensaje de salida
