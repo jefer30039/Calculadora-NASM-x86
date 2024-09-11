@@ -101,18 +101,19 @@ multiplicacion:
 	jmp mostrarResultado
 
 division: ;Division tiene problemas
-	mov rax, [num1]
-	mov rbx, [num2]
+	MOV rax, [num1]
+	MOV rbx, [num2]
 
 	;verificar si el divisor es 0
-	cmp rbx, 0
-	je divisionPorCero
+	CMP rbx, 0
+	JE divisionPorCero
 
 	;dividir números
-	IDIV rbx
-	mov [resultado], rax
-	jmp mostrarResultado
-
+	xor rdx, rdx
+	DIV rbx
+	MOV [resultado], rax
+	JMP mostrarResultado
+	
 divisionPorCero:
 	lea rdi, [msgDivPorCero]
 	call printstr
