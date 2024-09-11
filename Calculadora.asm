@@ -15,6 +15,7 @@ section .data
 	opcionInvOperacion: db 'Ingresó una operación inválida, inténtelo de nuevo.', 10, 0
 	saltoLinea: db 10, 0
 	msgDivPorCero: db 'No se puede dividir por 0', 10, 0
+	msgBaseInvalida: db 'Base inválida, inténtelo de nuevo.', 10, 0
 
 section .bss
 	operacion: resq 1 ; Almacena la operación a realizar
@@ -133,7 +134,12 @@ mostrarResultado:
 	je mostrarDecimal
 	cmp rbx, 4
 	je mostrarHexadecimal
-	jmp salir
+	
+	lea rdi, [msgBaseInvalida]
+	call printstr
+	lea rdi, [saltoLinea]
+	call printstr
+	jmp _start
 
 mostrarBinario:
 	lea rdi, [resultadoMsg]
