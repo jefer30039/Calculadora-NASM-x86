@@ -59,65 +59,65 @@ _start:
 	mov [num2], rax ; Guardar el segundo número en num2
 
 	; Realizar operación
-	CMP qword [operacion], 1
-	JE suma
-	CMP qword [operacion], 2
-	JE resta
-	CMP qword [operacion], 3
-	JE multiplicacion
-	CMP qword [operacion], 4
-	JE division
+	cmp qword [operacion], 1
+	je suma
+	cmp qword [operacion], 2
+	je resta
+	cmp qword [operacion], 3
+	je multiplicacion
+	cmp qword [operacion], 4
+	je division
 	lea rdi, [saltoLinea]
 	call printstr
 	lea rdi, [opcionInvOperacion]
 	call printstr
 	lea rdi, [saltoLinea]
 	call printstr
-	JMP _start
+	jmp _start
 
 suma:
 	;Sumar números
-	MOV rax, [num1]
-	MOV rbx, [num2]
+	mov rax, [num1]
+	mov rbx, [num2]
 	ADD rax, rbx
-	MOV [resultado], rax
-	JMP mostrarResultado
+	mov [resultado], rax
+	jmp mostrarResultado
 
 resta:
 	;Restar números
-	MOV rax, [num1]
-	MOV rbx, [num2]
-	SUB rax, rbx
-	MOV [resultado], rax
-	JMP mostrarResultado
+	mov rax, [num1]
+	mov rbx, [num2]
+	sub rax, rbx
+	mov [resultado], rax
+	jmp mostrarResultado
 
 multiplicacion:
 	;Multiplicar números
-	MOV rax, [num1]
-	MOV rbx, [num2]
+	mov rax, [num1]
+	mov rbx, [num2]
 	IMUL rax, rbx
-	MOV [resultado], rax
-	JMP mostrarResultado
+	mov [resultado], rax
+	jmp mostrarResultado
 
 division: ;Division tiene problemas
-	MOV rax, [num1]
-	MOV rbx, [num2]
+	mov rax, [num1]
+	mov rbx, [num2]
 
 	;verificar si el divisor es 0
-	CMP rbx, 0
-	JE divisionPorCero
+	cmp rbx, 0
+	je divisionPorCero
 
 	;dividir números
 	IDIV rbx
-	MOV [resultado], rax
-	JMP mostrarResultado
+	mov [resultado], rax
+	jmp mostrarResultado
 
 divisionPorCero:
 	lea rdi, [msgDivPorCero]
 	call printstr
 	lea rdi, [saltoLinea]
 	call printstr
-	JMP _start
+	jmp _start
 
 mostrarResultado:
 	; Mostrar resultado en la base seleccionada
@@ -125,15 +125,15 @@ mostrarResultado:
 	mov rbx, [base]        ; Cargar la base seleccionada
 
 	; Verificar base seleccionada y mostrar resultado
-	CMP rbx, 1
-	JE mostrarBinario
-	CMP rbx, 2
-	JE mostrarOctal
-	CMP rbx, 3
-	JE mostrarDecimal
-	CMP rbx, 4
-	JE mostrarHexadecimal
-	JMP salir
+	cmp rbx, 1
+	je mostrarBinario
+	cmp rbx, 2
+	je mostrarOctal
+	cmp rbx, 3
+	je mostrarDecimal
+	cmp rbx, 4
+	je mostrarHexadecimal
+	jmp salir
 
 mostrarBinario:
 	lea rdi, [resultadoMsg]
@@ -142,7 +142,7 @@ mostrarBinario:
 	call printbin  ; Llamado para imprimir en binario
 	lea rdi, [saltoLinea]
 	call printstr
-	JMP mostrarSalida
+	jmp mostrarSalida
 
 mostrarOctal:
 	lea rdi, [resultadoMsg]
@@ -151,7 +151,7 @@ mostrarOctal:
 	call printoct  ; Llamado para imprimir en octal
 	lea rdi, [saltoLinea]
 	call printstr
-	JMP mostrarSalida
+	jmp mostrarSalida
 
 mostrarDecimal:
 	lea rdi, [resultadoMsg]
@@ -160,7 +160,7 @@ mostrarDecimal:
 	call printint  ; Llamado para imprimir en decimal
 	lea rdi, [saltoLinea]
 	call printstr
-	JMP mostrarSalida
+	jmp mostrarSalida
 
 mostrarHexadecimal:
 	lea rdi, [resultadoMsg]
@@ -169,7 +169,7 @@ mostrarHexadecimal:
 	call printhex  ; Llamado para imprimir en hexadecimal
 	lea rdi, [saltoLinea]
 	call printstr
-	JMP mostrarSalida
+	jmp mostrarSalida
 
 printbin:
     ; Convierte el número en rdi a binario y lo imprime
@@ -249,11 +249,11 @@ mostrarSalida:
 	lea rdi, [msgSalida]
 	call printstr
 	call readint
-	CMP rax, 1
-	JE _start
+	cmp rax, 1
+	je _start
 
 salir:
 	;Salir del programa
-	MOV eax, 1
-	MOV ebx, 0
+	mov eax, 1
+	mov ebx, 0
 	INT 0x80
