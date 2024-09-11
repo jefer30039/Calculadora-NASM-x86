@@ -22,7 +22,7 @@ section .bss
 	num1: resq 1 ; Almacena el primer número (operando)
 	num2: resq 1 ; Almacena el segundo número (operando)
 	resultado: resq 1 ; Almacena el resultado
-	buffer resb 64  ; Buffer para almacenar cadenas
+	buffer resb 65  ; Buffer para almacenar cadenas
 
 section .text
 	global _start
@@ -172,21 +172,52 @@ mostrarHexadecimal:
 	jmp mostrarSalida
 
 printbin:
-    ; Convierte el número en rdi a binario y lo imprime
-	; Aquí puedes implementar la lógica de conversión y mostrar bit por bit
-	ret
+    mov rax, rdi          ; Cargar el número en rax (número a convertir)
+    mov rcx, 64           ; Máximo 64 bits para representación binaria
+    lea rsi, [buffer + 64]; Apuntar al final del buffer (64 bytes)
+    mov byte [rsi], 0     ; Añadir un terminador nulo al final del buffer
 
-printchar:
-    ; RDI contiene el carácter a imprimir
-	mov rax, 1              ; syscall: sys_write
-	mov rdi, 1              ; file descriptor: stdout (1 = salida estándar)
-	mov rsi, rsp            ; usar la pila para el carácter
-	sub rsp, 1              ; reservar 1 byte en la pila
-	mov [rsp], dil          ; almacenar el carácter en la pila (dil = 8 bits de rdi)
-	mov rdx, 1              ; tamaño de 1 byte
-	syscall                 ; llamada al sistema
-	add rsp, 1              ; restaurar la pila
-	ret                     ; regresar de la función
+    ; Verificar si el número es 0
+    test rax, rax
+    jnz printbin_loop     ; Si el número no es 0, proceder con la conversión
+    ; Si el número es 0, imprimir directamente '0'
+    dec rsi
+    mov byte [rsi], '0'
+    jmp printbin_done
+
+printbin_loop:
+    ; Asegúrate de no sobrepasar el inicio del buffer
+    cmp rsi, buffer       ; Verificar si hemos alcanzado el inicio del buffer
+    jb printbin_done      ; Si `rsi` ha alcanzado el inicio, terminar la conversión
+
+    dec rsi               ; Mover el puntero del buffer hacia atrás
+    xor rdx, rdx          ; Limpiar rdx para la división
+    mov rbx, 2            ; Cargar el divisor 2 en rbx
+    div rbx               ; Dividir el número en rax entre 2
+    add dl, '0'           ; Convertir el bit (0 o 1) a carácter ASCII
+    mov [rsi], dl         ; Guardar el bit en el buffer
+    test rax, rax         ; Verificar si el cociente es 0
+    jnz printbin_loop     ; Si no es 0, continuar dividiendo
+
+printbin_done:
+    lea rdi, [rsi]        ; Apuntar a la cadena binaria en el buffer
+    call printstr_bin     ; Imprimir la cadena binaria
+    ret
+
+printstr_bin:
+    mov rdx, 0       ; Reiniciar el contador de longitud
+count_chars:
+    cmp byte [rdi+rdx], 0  ; Verificar si llegamos al terminador nulo
+    je  done_counting
+    inc rdx
+    jmp count_chars
+
+done_counting:
+    mov rax, 1       ; sys_write
+    mov rsi, rdi     ; Puntero a la cadena
+    mov rdi, 1       ; File descriptor para salida estándar (stdout)
+    syscall          ; Llamar al sistema
+    ret
 
 printoct:
 	mov rax, rdi        ; Copiamos el número en rax
