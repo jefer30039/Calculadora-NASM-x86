@@ -10,7 +10,13 @@ Operaciones disponibles:
 - Suma
 - Resta
 - Multiplicación
-- ~~División~~
+- División
+  
+La calculadora es capaz de mostrar los resultados en la base que se seleccione entre:
+- Binario
+- Octal
+- Decimal
+- Hexadecimal
 
 ## Para ejecutar:
       make run
