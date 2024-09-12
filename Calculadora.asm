@@ -100,17 +100,39 @@ multiplicacion:
 	mov [resultado], rax
 	jmp mostrarResultado
 
-division: ;Division tiene problemas
-	MOV rax, [num1]
-	MOV rbx, [num2]
+division:
+    MOV rax, [num1] ; Dividendo
+    MOV rbx, [num2] ; Divisor
 
-	;verificar si el divisor es 0
-	CMP rbx, 0
-	JE divisionPorCero
+    ; Verificar si el divisor es 0
+    CMP rbx, 0
+    JE divisionPorCero
 
-	;dividir números
-	xor rdx, rdx
-	DIV rbx
+    ; Casos negativos
+    CMP rax, 0
+    JL  dividendoNegativo ; Si el dividendo es negativo
+    CMP rbx, 0
+    JL  divisorNegativo   ; Si el divisor es negativo
+
+    ; División
+    CWD ; Extender el signo de rax a dx:rax
+    DIV rbx
+    MOV [resultado], rax
+
+    JMP mostrarResultado
+
+dividendoNegativo:
+    NEG rax
+    JMP continuarDivision
+
+divisorNegativo:
+    NEG rbx
+    JMP continuarDivision
+
+continuarDivision:
+    CWD
+    DIV rbx
+    NEG rax ; Negar el resultado si el divisor era negativo
 	MOV [resultado], rax
 	JMP mostrarResultado
 	
